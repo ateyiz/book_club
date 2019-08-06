@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Tue Aug 06 22:47:51 EEST 2019:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.1 - (1616546): instance a816c00e-016c-6879-3c01-000007807870 
+on database directory C:\Users\erdemiryigit\MyDB\book_club with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@73d16e93 
+Loaded from file:/C:/Users/erdemiryigit/.m2/repository/org/apache/derby/derby/10.11.1.1/derby-10.11.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=12.0.2+10
+user.dir=C:\Users\erdemiryigit\eclipse-workspace\book-club
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
