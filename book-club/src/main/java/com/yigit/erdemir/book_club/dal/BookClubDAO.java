@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ public class BookClubDAO {
 		    memberDTO.setId(rs.getInt("ID"));
 
 		    memberDTO.setName(rs.getString("NAME"));
+
 		    memberDTO.setDonated(rs.getInt("DONATED"));
 
 		    memberDTO.setBorrowed(rs.getInt("BORROWED"));
@@ -53,15 +55,15 @@ public class BookClubDAO {
 
 		while (rs.next()) {
 
-		    bookDTO.setId(rs.getInt("id"));
+		    bookDTO.setId(rs.getInt("ID"));
 
-		    bookDTO.setName(rs.getString("name"));
+		    bookDTO.setName(rs.getString("NAME"));
 
 		    bookDTO.setDonatedBy(rs.getInt("donated"));
 
-		    bookDTO.setBorrowedBy(rs.getInt("borrowed"));
+		    bookDTO.setBorrowedBy(rs.getInt("BORROWED_BY"));
 
-		    bookDTO.setDateBorrowed(rs.getDate("dateGiven"));
+		    bookDTO.setDateBorrowed(rs.getDate(""));
 		}
 	    }
 	    return bookDTO;
@@ -103,10 +105,12 @@ public class BookClubDAO {
 	}
     }
 
-    public List<HistoryDTO> getMemberHistory(Connection con, String username) throws SQLException {
+    public List<HistoryDTO> getMemberHistory(Connection con, int id) throws SQLException {
 
 	String query = "SELECT * FROM HISTORY WHERE MEMBER_ID = ?";
 	try (PreparedStatement myStmt = con.prepareStatement(query)) {
+
+	    myStmt.setInt(1, id);
 
 	    List<HistoryDTO> historyList = new ArrayList<HistoryDTO>();
 
@@ -188,15 +192,16 @@ public class BookClubDAO {
      * t_pstmt.executeUpdate(); t_resultset = t_pstmt.getGeneratedKeys(); if( rownum
      * != 0 && !t_resultset.next()) { t_iVersion = t_resultset.getInt(1); }
      */
-    public int insertBook(Connection con, String bookName, String author, int donatedBy, Date firstPublished)
+
+    public int insertBook(Connection con, String bookname, String author, int donatedBy, Date firstPublished)
 	    throws SQLException {
 	int insertedID = 0;
 
 	String query = "INSERT INTO BOOKS(NAME, AUTHOR, DONATED_BY,FIRST_PUBLISHED) " + "VALUES(?,?,?,?)";
 
-	try (PreparedStatement myStmt = con.prepareStatement(query)) {
+	try (PreparedStatement myStmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
-	    myStmt.setString(1, bookName);
+	    myStmt.setString(1, bookname);
 
 	    myStmt.setString(2, author);
 
@@ -207,14 +212,15 @@ public class BookClubDAO {
 	    } else
 		myStmt.setDate(4, null);
 
-	    int affectedRows = myStmt.executeUpdate(query);
+	    int affectedRows = myStmt.executeUpdate();
 
 	    boolean success = affectedRows > 0;
 
 	    if (success) {
 		ResultSet rs = myStmt.getGeneratedKeys();
-		insertedID = rs.getInt(1);
-		con.commit();
+		if (rs.next()) {
+		    insertedID = rs.getInt(1);
+		}
 
 	    }
 	    return insertedID;
@@ -222,9 +228,27 @@ public class BookClubDAO {
 	}
     }
 
+    public boolean insertHistory(Connection con, int book_id, int member_id, Date dateDonated) throws SQLException {
+
+	String query = "INSERT INTO HISTORY(BOOK_ID, MEMBER_ID, DATE_DONATED) VALUES (?,?,?)";
+
+	try (PreparedStatement myStmt = con.prepareStatement(query)) {
+
+	    myStmt.setInt(1, book_id);
+
+	    myStmt.setInt(2, member_id);
+
+	    myStmt.setDate(3, new java.sql.Date(dateDonated.getTime()));
+
+	    int affectedRows = myStmt.executeUpdate();
+
+	    return affectedRows > 0;
+	}
+    }
+
     public boolean updateMember(Connection con, int id, String name) throws SQLException {
 
-	String query = "UPDATE MEMBER SET NAME =? WHERE ID=?";
+	String query = "UPDATE MEMBERS SET NAME =? WHERE ID=?";
 
 	try (PreparedStatement myStmt = con.prepareStatement(query)) {
 
@@ -232,28 +256,29 @@ public class BookClubDAO {
 
 	    myStmt.setInt(2, id);
 
-	    int affectedRows = myStmt.executeUpdate(query);
+	    int affectedRows = myStmt.executeUpdate();
 
 	    return affectedRows > 0;
 	}
     }
 
-    /*
-     * public boolean updateMember(Connection con, int id, int donated, int
-     * borrowed) throws SQLException {
-     * 
-     * String query = "UPDATE member SET borrowed=?, donated=? WHERE ID=?";
-     * 
-     * try (PreparedStatement myStmt = con.prepareStatement(query)) {
-     * 
-     * myStmt.setInt(1, borrowed);
-     * 
-     * myStmt.setInt(2, donated);
-     * 
-     * int affectedRows = myStmt.executeUpdate(query);
-     * 
-     * return affectedRows > 0; } }
-     */
+    public boolean updateMember(Connection con, int id, int donated, int borrowed) throws SQLException {
+
+	String query = "UPDATE MEMBERS SET BORROWED=?, DONATED=? WHERE ID=?";
+
+	try (PreparedStatement myStmt = con.prepareStatement(query)) {
+
+	    myStmt.setInt(1, borrowed);
+
+	    myStmt.setInt(2, donated);
+
+	    myStmt.setInt(3, id);
+
+	    int affectedRows = myStmt.executeUpdate();
+
+	    return affectedRows > 0;
+	}
+    }
 
     // BURAYI SOR ID NEREDEN GELİYOR
     /*
@@ -287,7 +312,7 @@ public class BookClubDAO {
     // RETURN 1=> Kitap dışarda ise kulübe geri verir.
 
     public boolean deleteBook(Connection con, int id) throws SQLException {
-	String query = "DELETE FROM books WHERE id=? ";
+	String query = "DELETE FROM BOOKS WHERE id=? ";
 
 	try (PreparedStatement myStmt = con.prepareStatement(query)) {
 
@@ -300,9 +325,36 @@ public class BookClubDAO {
 	}
     }
 
-    public boolean searchBook(Connection con, String bookName) {
+    public boolean searchBook(Connection con, String bookname) throws SQLException {
 
-	String query = "SELECT * FROM books WHERE name LIKE '%?%' ";
+	String query = "SELECT * FROM BOOKS WHERE NAME LIKE '%?%' ";
+	try (PreparedStatement myStmt = con.prepareStatement(query)) {
+	    try (ResultSet rs = myStmt.executeQuery()) {
+
+		myStmt.setString(1, bookname);
+
+		BookDTO bookDTO = new BookDTO();
+
+		while (rs.next()) {
+
+		    bookDTO.setId(rs.getInt("ID"));
+
+		    bookDTO.setName(rs.getString("NAME"));
+
+		    bookDTO.setDateBorrowed(rs.getDate("dateBorrowed"));
+
+		    bookDTO.setDateDonated(rs.getDate("dateDonated"));
+
+		    // bookDTO.setDateReturned(rs.getDate("dateReturned"));
+
+		    // bookDTO.add(historyDTO);
+
+		}
+	    }
+
+	    myStmt.setString(1, bookname);
+
+	}
 	return false;
     }
 

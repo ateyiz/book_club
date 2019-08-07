@@ -3,6 +3,8 @@ package com.yigit.erdemir.book_club.bl;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,14 +48,33 @@ public class BookClubBO {
     // ACCEPT YIGIT ILLIAD HOMER=> YIGITten ILLIAD isimli HOMER tarafından yazılmış
     // kitabı alıp kulube katar. Kitap idsini verir.
 
-    public int addBook(String username, String bookname, String author, Date firstPublished) throws SQLException {
+    public int addBook(String[] h) throws SQLException, ParseException {
 	try (Connection con = DriverManager.getConnection(url)) {
-
-	    MemberDTO memberDTO = bookClubDAO.getMember(con, username);
-
-	    int id = memberDTO.getId();
-
-	    return bookClubDAO.insertBook(con, bookname, author, id, firstPublished);
+	    MemberDTO memberDTO = bookClubDAO.getMember(con, h[1]);
+	    int insBookID = 0;
+	    int donatedBy = memberDTO.getId();
+	    int currentDonated = memberDTO.getDonated();
+	    int currentBorrowed = memberDTO.getBorrowed();
+	    String bookname = h[2];
+	    String author = h[3];
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+	    if (h.length < 5) {
+		insBookID = bookClubDAO.insertBook(con, bookname, author, donatedBy, null);
+	    } else {
+		Date firstPublished = sdf.parse(h[4]);
+		insBookID = bookClubDAO.insertBook(con, bookname, author, donatedBy, firstPublished);
+	    }
+	    boolean insertHistory = bookClubDAO.insertHistory(con, insBookID, donatedBy, new java.util.Date());
+	    boolean isUpdated = bookClubDAO.updateMember(con, donatedBy, currentDonated + 1, currentBorrowed);
+	    if (insertHistory && isUpdated && insBookID != 0) {
+		con.commit();
+	    }
+	    return insBookID;
+	    /*
+	     * } else { Date firstPublished = new
+	     * SimpleDateFormat("dd/MM/yyyy").parse(h[4]); return
+	     * bookClubDAO.insertBook(con, bookname, author, id, firstPublished); }
+	     */
 
 	} catch (SQLException ex) {
 	    ex.printStackTrace();
@@ -66,11 +87,11 @@ public class BookClubBO {
     // RENAME MEMBER YIGIT YIGIT.E => Yiğit kullanıcısının ismi değişir. Kayıtları
     // etkilenmez.
 
-    public boolean renameMember(String memberName, String newName) throws SQLException {
+    public boolean renameMember(String membername, String newName) throws SQLException {
 
 	try (Connection con = DriverManager.getConnection(url)) {
 
-	    MemberDTO memberDTO = bookClubDAO.getMember(con, memberName);
+	    MemberDTO memberDTO = bookClubDAO.getMember(con, membername);
 
 	    int id = memberDTO.getId();
 
@@ -164,6 +185,7 @@ public class BookClubBO {
     }
 
     public Book findBook(String bookName) {
+
 	return null;
     }
 

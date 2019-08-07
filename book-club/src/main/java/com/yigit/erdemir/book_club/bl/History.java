@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class History {
     private int memberID;
-    private String memberName;
+    private String membername;
     private Date dateBorrowed;
     private Date dateReturned;
     private Date dateDonated;
@@ -18,11 +18,11 @@ public class History {
     }
 
     public String getMemberName() {
-	return memberName;
+	return membername;
     }
 
-    public void setMemberName(String memberName) {
-	this.memberName = memberName;
+    public void setMemberName(String membername) {
+	this.membername = membername;
     }
 
     public Date getDateBorrowed() {
