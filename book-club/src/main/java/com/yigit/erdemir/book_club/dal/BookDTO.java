@@ -1,6 +1,6 @@
 package com.yigit.erdemir.book_club.dal;
 
-import java.sql.Date;
+import java.util.Date;
 
 public class BookDTO {
 
@@ -8,9 +8,7 @@ public class BookDTO {
     private String name;
     private String author;
     private int donatedBy;
-    private Integer borrowedBy;
-    private Date dateDonated;
-    private Date dateBorrowed;
+    private Date firstPublished;
     private boolean isBorrowed;
 
     public int getId() {
@@ -45,36 +43,20 @@ public class BookDTO {
 	this.donatedBy = donatedBy;
     }
 
-    public Integer getBorrowedBy() {
-	return borrowedBy;
-    }
-
-    public void setBorrowedBy(int borrowedBy) {
-	this.borrowedBy = borrowedBy;
-    }
-
-    public Date getDateBorrowed() {
-	return dateBorrowed;
-    }
-
-    public void setDateBorrowed(Date dateBorrowed) {
-	this.dateBorrowed = dateBorrowed;
-    }
-
-    public Date getDateDonated() {
-	return dateDonated;
-    }
-
-    public void setDateDonated(Date dateDonated) {
-	this.dateDonated = dateDonated;
-    }
-
     public boolean isBorrowed() {
 	return isBorrowed;
     }
 
     public void setBorrowed(boolean isBorrowed) {
 	this.isBorrowed = isBorrowed;
+    }
+
+    public Date getFirstPublished() {
+	return firstPublished;
+    }
+
+    public void setFirstPublished(Date firstPublished) {
+	this.firstPublished = firstPublished;
     }
 
 }

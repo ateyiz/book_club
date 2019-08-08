@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.yigit.erdemir.book_club.dal.BookClubDAO;
+import com.yigit.erdemir.book_club.dal.BookDTO;
+import com.yigit.erdemir.book_club.dal.HistoryDTO;
 import com.yigit.erdemir.book_club.dal.MemberDTO;
 
 public class BookClubBO {
@@ -23,6 +25,8 @@ public class BookClubBO {
     }
 
     // REGISTER YIGIT=> YIGIT isimli kullanıcı yaratır. Idsini ekrana döner.
+
+    // DONE
     public int registerMember(String memberName) throws SQLException {
 
 	int id = -1;
@@ -45,8 +49,80 @@ public class BookClubBO {
 
     }
 
+    // SHOW MEMBER=>tüm üye id ve isimlerini üye olma tarihlerini döner.
+
+    // DONE
+    public List<Member> showAllMembers() throws Exception {
+	try (Connection con = DriverManager.getConnection(url)) {
+
+	    List<MemberDTO> data = bookClubDAO.getAllMembers(con);
+
+	    List<Member> allMembers = new ArrayList<Member>();
+
+	    for (MemberDTO item : data) {
+
+		Member member = new Member();
+
+		member.setId(item.getId());
+
+		member.setMembersince(item.getMemberSince());
+
+		member.setName(item.getName());
+
+		allMembers.add(member);
+	    }
+	    return allMembers;
+	} catch (Exception ex) {
+	    ex.printStackTrace();
+	    throw new Exception("Error, could NOT get all members!");
+	}
+    }
+
+    public List<History> findBooks(String bookname) throws SQLException {
+	try (Connection con = DriverManager.getConnection(url)) {
+
+	    List<BookDTO> data = bookClubDAO.searchBook(con, bookname);
+
+	    List<History> allHistory = new ArrayList<History>();
+
+	    for (BookDTO item : data) {
+
+		History history = new History();
+
+		history.setBookID(item.getId());
+
+		history.setBookname(item.getName());
+
+		history.setAuthor((item.getAuthor()));
+
+		history.setFirstPublished(item.getFirstPublished());
+
+		List<HistoryDTO> histories = bookClubDAO.getBookHistory(con, history.getBookID());
+		for (HistoryDTO h : histories) {
+		    history.setDonatedBy(h.getDonatedBy());
+		    history.setDateBorrowed(h.getDateBorrowed());
+		    history.setDateReturned(h.getDateReturned());
+		    history.setDateDonated(h.getDateDonated());
+		}
+		allHistory.add(history);
+	    }
+	    return allHistory;
+
+	} catch (SQLException ex) {
+	    ex.printStackTrace();
+	    throw new SQLException("Book could NOT be found!");
+	}
+
+    }
+
     // ACCEPT YIGIT ILLIAD HOMER=> YIGITten ILLIAD isimli HOMER tarafından yazılmış
     // kitabı alıp kulube katar. Kitap idsini verir.
+    // ACCEPT YIGIT IT KING 1986=> YIGITten IT isimli KING tarafından 1986 yazılmış
+    // kitabı Kabul eder.
+    // Kitap idsini verir.
+    // HİSTORY TABLOSUNA İLGİLİ KAYIT AÇILACAK
+
+    // DONE
 
     public int addBook(String[] h) throws SQLException, ParseException {
 	try (Connection con = DriverManager.getConnection(url)) {
@@ -87,6 +163,7 @@ public class BookClubBO {
     // RENAME MEMBER YIGIT YIGIT.E => Yiğit kullanıcısının ismi değişir. Kayıtları
     // etkilenmez.
 
+    // DONE
     public boolean renameMember(String membername, String newName) throws SQLException {
 
 	try (Connection con = DriverManager.getConnection(url)) {
@@ -109,53 +186,39 @@ public class BookClubBO {
 	}
     }
 
-    public List<Member> showAllMembers() throws Exception {
-	try (Connection con = DriverManager.getConnection(url)) {
-
-	    List<MemberDTO> data = bookClubDAO.getAllMembers(con);
-
-	    List<Member> allMembers = new ArrayList<Member>();
-
-	    for (MemberDTO item : data) {
-		Member member = new Member();
-		member.setId(item.getId());
-		member.setMembersince(item.getMemberSince());
-		member.setName(item.getName());
-		allMembers.add(member);
-	    }
-	    return allMembers;
-	} catch (Exception ex) {
-	    ex.printStackTrace();
-	    throw new Exception("Error, could NOT get all members!");
-	}
-    }
-
     // BORROW YIGIT 1=> eğer kulupte ise 1 idli kitabı YIGIT’e verir değilse hata
     // verir. Aynı anda bağışladığından fazla kitap alamaz.
 
-    /*
-     * public boolean borrowBook(String memberName, int[] bookIDS) throws
-     * SQLException {
-     * 
-     * try (Connection con = DriverManager.getConnection(url)) {
-     * 
-     * MemberDTO memberDTO = bookClubDAO.getMember(con, memberName); if
-     * (memberDTO.getDonated() < memberDTO.getBorrowed() + bookIDS.length) { throw
-     * new SQLException("ERROR you can NOT get more than you have donated"); }
-     * 
-     * for (int i = 0; i < bookIDS.length; i++) { BookDTO bookDTO =
-     * bookClubDAO.getBook(con, bookIDS[i]); if (!bookDTO.isBorrowed()) { boolean
-     * updated = bookClubDAO.updateBook(con, bookIDS[i], memberDTO.getId()); if
-     * (!updated) { throw new SQLException("an ERROR occured while updating book: "
-     * + bookDTO.getName()); } } else { throw new SQLException(bookDTO.getName() +
-     * " is already borrowed!"); }
-     * 
-     * } boolean success = bookClubDAO.updateMember(con, memberDTO.getId(),
-     * memberDTO.getDonated(), memberDTO.getBorrowed() + bookIDS.length); if
-     * (success) { con.commit();
-     * 
-     * } return success; } }
-     */
+    public boolean borrowBook(String memberName, int[] bookIDS) throws SQLException {
+
+	try (Connection con = DriverManager.getConnection(url)) {
+
+	    MemberDTO memberDTO = bookClubDAO.getMember(con, memberName);
+	    if (memberDTO.getDonated() < memberDTO.getBorrowed() + bookIDS.length) {
+		throw new SQLException("ERROR you can NOT get more than you have donated");
+	    }
+
+	    for (int i = 0; i < bookIDS.length; i++) {
+		BookDTO bookDTO = bookClubDAO.getBook(con, bookIDS[i]);
+		if (!bookDTO.isBorrowed()) {
+		    boolean updated = bookClubDAO.updateBook(con, bookIDS[i], memberDTO.getId());
+		    if (!updated) {
+			throw new SQLException("an ERROR occured while updating book: " + bookDTO.getName());
+		    }
+		} else {
+		    throw new SQLException(bookDTO.getName() + " is already borrowed!");
+		}
+
+	    }
+	    boolean success = bookClubDAO.updateMember(con, memberDTO.getId(), memberDTO.getDonated(),
+		    memberDTO.getBorrowed() + bookIDS.length);
+	    if (success) {
+		con.commit();
+
+	    }
+	    return success;
+	}
+    }
 
     // RETURN 1=> Kitap dışarda ise kulübe geri verir.
     public boolean returnBook(int bookID) {
@@ -175,18 +238,16 @@ public class BookClubBO {
 	try (Connection con = DriverManager.getConnection(url)) {
 
 	    boolean success = bookClubDAO.deleteBook(con, bookID);
-	    con.commit();
+	    if (success) {
+		con.commit();
+	    }
+
 	    return success;
 
 	} catch (Exception ex) {
 	    ex.printStackTrace();
 	    throw new SQLException("Error, could NOT get all members!");
 	}
-    }
-
-    public Book findBook(String bookName) {
-
-	return null;
     }
 
     // HISTORY BOOK 1 =>1 idli kitabın hangi kullanıcı tarafından ne zaman

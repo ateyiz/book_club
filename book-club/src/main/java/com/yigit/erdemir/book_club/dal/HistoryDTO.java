@@ -4,19 +4,11 @@ import java.util.Date;
 
 public class HistoryDTO {
 
-    private int memberID;
+    private int donatedBy;
     private int bookID;
     private Date dateBorrowed;
     private Date dateReturned;
     private Date dateDonated;
-
-    public int getMemberID() {
-	return memberID;
-    }
-
-    public void setMemberID(int memberID) {
-	this.memberID = memberID;
-    }
 
     public int getBookID() {
 	return bookID;
@@ -48,6 +40,14 @@ public class HistoryDTO {
 
     public void setDateDonated(Date dateDonated) {
 	this.dateDonated = dateDonated;
+    }
+
+    public int getDonatedBy() {
+	return donatedBy;
+    }
+
+    public void setDonatedBy(int donatedBy) {
+	this.donatedBy = donatedBy;
     }
 
 }

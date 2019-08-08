@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import com.yigit.erdemir.book_club.bl.BookClubBO;
 import com.yigit.erdemir.book_club.bl.CreateTable;
+import com.yigit.erdemir.book_club.bl.History;
 import com.yigit.erdemir.book_club.bl.Member;
 
 public class App {
@@ -57,7 +58,28 @@ public class App {
 		}
 
 		if ("FIND".trim().equalsIgnoreCase(commands[0])) {
-		    operation.findBook(commands[1]);
+		    if ("BOOK".trim().equalsIgnoreCase(commands[1])) {
+			List<History> histories = operation.findBooks(commands[2]);
+			int size = histories.size();
+			System.out.println("ID\t" + "NAME\t" + "AUTHOR\t" + "FIRST_PUBLISHED\t" + "DONATED_BY\t"
+				+ "DATE_DONATED\t" + "BORROWED_BY\t" + "DATE_BORROWED\t");
+			for (History history : histories) {
+			    int id = history.getBookID();
+			    String name = history.getBookname();
+			    String author = history.getAuthor();
+			    Date firstPublished = history.getFirstPublished();
+			    String fp = String.format("%1$td.%1$tm.%1$ty %n", firstPublished);
+			    int donatedBy = history.getDonatedBy();
+			    Date dateDonated = history.getDateDonated();
+			    String dd = String.format("%1$td.%1$tm.%1$ty %n", dateDonated);
+			    int borrowedBy = history.getBorrowedBy();
+			    Date dateBorrowed = history.getDateBorrowed();
+			    String db = String.format("%1$td.%1$tm.%1$ty %n", dateBorrowed);
+			    System.out.printf("%d\t %s\t %s\t %d\t %s\t %d\t %s\t", id, name, author, fp, donatedBy, dd,
+				    borrowedBy, db);
+			}
+
+		    }
 		}
 
 		if ("BORROW".trim().equalsIgnoreCase(commands[0])) {
@@ -67,7 +89,11 @@ public class App {
 		    for (int i = 0; i < commands.length - 2; i++) {
 			books[i] = Integer.parseInt(commands[i + 2]);
 		    }
-		    // operation.borrowBook(username, books);
+		    if (operation.borrowBook(username, books)) {
+			System.out.println("User has borrowed the book(s)");
+
+		    }
+
 		}
 
 		if ("RETURN".trim().equalsIgnoreCase(commands[0])) {
