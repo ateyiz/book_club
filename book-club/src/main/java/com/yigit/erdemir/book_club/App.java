@@ -83,7 +83,6 @@ public class App {
 		}
 
 		if ("BORROW".trim().equalsIgnoreCase(commands[0])) {
-		    // AQ
 		    String username = commands[1];
 		    int[] books = new int[commands.length - 2];
 		    for (int i = 0; i < commands.length - 2; i++) {
