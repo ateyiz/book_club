@@ -7,9 +7,12 @@ public class BookDTO {
     private int id;
     private String name;
     private String author;
+    private String donator;
     private int donatedBy;
+    private int borrowedBy;
+    private Date lastBorrowedDate;
     private Date firstPublished;
-    private boolean isBorrowed;
+    private Date dateDonated;
 
     public int getId() {
 	return id;
@@ -43,20 +46,44 @@ public class BookDTO {
 	this.donatedBy = donatedBy;
     }
 
-    public boolean isBorrowed() {
-	return isBorrowed;
-    }
-
-    public void setBorrowed(boolean isBorrowed) {
-	this.isBorrowed = isBorrowed;
-    }
-
     public Date getFirstPublished() {
 	return firstPublished;
     }
 
     public void setFirstPublished(Date firstPublished) {
 	this.firstPublished = firstPublished;
+    }
+
+    public int getBorrowedBy() {
+	return borrowedBy;
+    }
+
+    public void setBorrowedBy(int borrowedBy) {
+	this.borrowedBy = borrowedBy;
+    }
+
+    public Date getLastBorrowedDate() {
+	return lastBorrowedDate;
+    }
+
+    public void setLastBorrowedDate(Date lastBorrowedDate) {
+	this.lastBorrowedDate = lastBorrowedDate;
+    }
+
+    public String getDonator() {
+	return donator;
+    }
+
+    public void setDonator(String donator) {
+	this.donator = donator;
+    }
+
+    public Date getDateDonated() {
+	return dateDonated;
+    }
+
+    public void setDateDonated(Date dateDonated) {
+	this.dateDonated = dateDonated;
     }
 
 }
